@@ -1,19 +1,28 @@
-from flask import Flask, render_template
-from flask_sqlalchemy import SQLAlchemy 
+from flask import Flask, render_template, flash, request, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Insert, String
+import smtplib
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+EMAIL_ID = os.getenv('EMAIL_ID')
+PASSWORD = os.getenv('PASSWORD')
+
 
 class Base(DeclarativeBase):
     pass
+
 
 db = SQLAlchemy(model_class=Base)
 
 app = Flask(__name__)
 app.secret_key = 'bd83y7dhbh81w21q'
-
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///project.db"
-
 db.init_app(app)
+
 
 class Project(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -23,21 +32,42 @@ class Project(db.Model):
     image: Mapped[str] = mapped_column(nullable=False)
 
 
-# with app.app_context():
-#     result = db.session.execute(db.select(Project))
-#     print(result.scalar())
-
-
-
-
 @app.route('/')
 def index():
     result = db.session.execute(db.select(Project))
     projects = result.scalars()
-    # for d in data:
-    #     print(d.title)
     return render_template('index.html', projects=projects)
 
 
+@app.route('/connect', methods=['POST'])
+def connect():
+    if request.method == 'POST':
+        data = request.form
+        # print(data['name'], data['email'], data['phone'], data['message'])
+        status = send_mail(data['name'], data['email'], data['phone'], data['message'])
+        # print(status)
+        if status == 'failed':
+            flash('Error sending message!', 'danger')
+        else:
+            flash('Message sent successfully.', 'success')
+
+        return redirect(url_for('index'))
+
+
+def send_mail(name, email, phone, msg):
+    email_msg = f"Subject: New Message\n\nName: {name}\nemail_id: {email}\nPhone No. {phone}\nMessage: {msg}\n"
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as connection:
+            connection.starttls()
+            connection.login(EMAIL_ID, PASSWORD)
+            connection.sendmail(EMAIL_ID, EMAIL_ID, email_msg)
+        return 'success'
+
+    except Exception as e:
+        return 'failed'
+
+
 if __name__ == '__main__':
+    # with app.app_context():
+    #     db.create_all()
     app.run(debug=True)
