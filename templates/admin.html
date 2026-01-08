@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <!-- SweetAlert2 (for alert popups) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <h1>
+        {% for project in projects%}
+            <h3>Project ID: {{project.id}} <a href="{{url_for('edit', id=project.id)}}"><button>Edit</button></a> <button>Replace</button></h3> 
+            <ul>
+                <li>Title: {{project.title}}</li>
+                <li>description: {{project.description}}</li>
+                <li>Link: {{project.link}}</li>
+            </ul>
+            
+        {% endfor %}
+
+    </h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <script>
+            {% for category, message in messages %}
+                Swal.fire({
+                    icon: '{{ "success" if category == "success" else "error" }}',
+                    title: '{{ message }}',
+                    confirmButtonColor: '#3085d6'
+                    });
+            {% endfor %}
+        </script>
+        {% endif %}
+    {% endwith %}
+</body>
+</body>
+</html>

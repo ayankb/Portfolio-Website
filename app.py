@@ -64,7 +64,33 @@ def send_mail(name, email, phone, msg):
         return 'success'
 
     except Exception as e:
+        print(e)
         return 'failed'
+    
+
+@app.route('/admin')
+def admin():
+    result = db.session.execute(db.select(Project))
+    projects = result.scalars()
+    
+    return render_template('admin.html', projects=projects)
+
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit(id):
+    if request.method == 'POST':
+        data = request.form
+        project = db.get_or_404(Project, id)
+        project.title = data['title']
+        project.description = data['description']
+        project.link = data['link']
+        project.image = data['image']
+        db.session.commit()
+        flash('Project updated successfully.', 'success')
+        return redirect(url_for('admin'))
+    
+    project = db.get_or_404(Project, id)
+    return render_template('edit.html', project=project)
+
 
 
 if __name__ == '__main__':
