@@ -10,7 +10,8 @@
 <body>
     <h1>
         {% for project in projects%}
-            <h3>Project ID: {{project.id}} <a href="{{url_for('edit', id=project.id)}}"><button>Edit</button></a> <button>Replace</button></h3> 
+            <h3>Project ID: {{project.id}} <a href="{{url_for('edit', id=project.id)}}"><button>Edit</button></a> 
+                                            <a href="{{url_for('delete', id=project.id)}}"><button>delete</button></a></h3> 
             <ul>
                 <li>Title: {{project.title}}</li>
                 <li>description: {{project.description}}</li>
@@ -20,6 +21,10 @@
         {% endfor %}
 
     </h1>
+
+    <div id="add-project">
+        <a href="{{url_for('add_project')}}" >Add new project</a>
+    </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

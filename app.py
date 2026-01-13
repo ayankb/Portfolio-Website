@@ -91,6 +91,40 @@ def edit(id):
     project = db.get_or_404(Project, id)
     return render_template('edit.html', project=project)
 
+@app.route('/delete/<int:id>')
+def delete(id):
+    project = db.get_or_404(Project, id)
+    db.session.delete(project)
+    db.session.commit()
+
+    flash('Project deleted successfully.', 'success')
+    return redirect(url_for('admin'))
+
+
+@app.route('/add_project', methods=['GET', 'POST'])
+def add_project():
+    if request.method == 'POST':
+        data = request.form
+        title = data['title']
+        description = data['description']
+        link = data['link']
+        image = data['image']
+        new_project = Project(
+            title=title,
+            description=description,
+            link=link,
+            image=image
+        )
+        db.session.add(new_project)
+        db.session.commit()
+
+        flash("Project added successfully.", 'success')
+        return redirect(url_for('admin'))
+    
+    return render_template('add.html')
+
+
+
 
 
 if __name__ == '__main__':
